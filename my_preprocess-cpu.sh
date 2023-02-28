@@ -14,7 +14,6 @@ python extract_rgb_flow.py \
 -i $data/features/${soundtype}/videos_10s_21.5fps \
 -o $data/features/${soundtype}/OF_10s_21.5fps
 
-
 # #Split training/testing list
 python my_gen_list.py \
 -i $data/videos/${soundtype} \
