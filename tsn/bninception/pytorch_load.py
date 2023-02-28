@@ -3,6 +3,7 @@ from torch import nn
 from .layer_factory import get_basic_layer, parse_expr
 import torch.utils.model_zoo as model_zoo
 import yaml
+from yaml.loader import SafeLoader
 
 
 class BNInception(nn.Module):
@@ -10,7 +11,7 @@ class BNInception(nn.Module):
                        weight_url='https://yjxiong.blob.core.windows.net/models/bn_inception-9f5701afb96c8044.pth'):
         super(BNInception, self).__init__()
 
-        manifest = yaml.load(open(model_path))
+        manifest = yaml.load(open(model_path), Loader = SafeLoader)
 
         layers = manifest['layers']
 

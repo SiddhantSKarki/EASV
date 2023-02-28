@@ -21,26 +21,29 @@ def cal_for_frames(video_path, output_dir, width, height):
         if not reg:
             break
         curr = cv2.resize(curr, (width, height))
-        cv2.imwrite(P.join(save_dir, f"img_{num:05d}.jpg"), curr)
+        pth = P.join(save_dir, f"img_{num:05d}.jpg")
+        cv2.imwrite(pth, curr)
+        print(pth)
         curr = cv2.cvtColor(curr, cv2.COLOR_BGR2GRAY)
         flow = compute_TVL1(prev, curr)
         cv2.imwrite(P.join(save_dir, f"flow_x_{num:05d}.jpg"), flow[:, :, 0])
         cv2.imwrite(P.join(save_dir, f"flow_y_{num:05d}.jpg"), flow[:, :, 1])
         prev = curr
         num += 1
-    if num < 215:
-        print(video_path)
+    return video_path
     
 def compute_TVL1(prev, curr, bound=20):
     """Compute the TV-L1 optical flow."""
-    TVL1 = cv2.DualTVL1OpticalFlow_create()
+    TVL1 = cv2.optflow.DualTVL1OpticalFlow_create()
     flow = TVL1.calc(prev, curr, None)
     flow[flow>bound]=bound
     flow[flow<-bound]=-bound
     flow-=-bound
     flow*=(255/float(2*bound))
     return flow
- 
+
+import tqdm.auto as tq
+
 if __name__ == '__main__':
     paser = argparse.ArgumentParser()
     paser.add_argument("-i", "--input_dir", default="data/features/dog/videos_10s_21.5fps")
@@ -57,6 +60,10 @@ if __name__ == '__main__':
 
     video_paths = glob(P.join(input_dir, "*.mp4"))
     video_paths.sort()
+    print("Starting worker pool...")
     with Pool(args.num_worker) as p:
-        p.map(partial(cal_for_frames, output_dir=output_dir, 
-                    width=width, height=height), video_paths)
+        func= partial(cal_for_frames, output_dir=output_dir, width=width, height=height)
+        for video_path in tq.tqdm(p.imap(func, video_paths), total=len(video_paths)):
+            tq.tqdm.write(video_path)
+
+            
