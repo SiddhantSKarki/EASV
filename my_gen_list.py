@@ -2,6 +2,7 @@ import os
 import os.path as P
 from glob import glob
 import argparse
+import random
 
 if __name__ == '__main__':
     paser = argparse.ArgumentParser()
@@ -13,20 +14,22 @@ if __name__ == '__main__':
     output_dir = args.output_dir
     os.makedirs(output_dir, exist_ok=True)
 
+    random.seed(127)
     video_paths = glob(P.join(input_dir, "*.mp4"))
-
     
-    print("FOR DEBUG ONLY we are putting all videos into")
-    print("BOTH the train AND the test lists.")
-    print("!!! PAY ATTENTION TO ME!!")
+    random.shuffle(video_paths)
+    val_ratio = 0.2;
+    num_val = int(round(val_ratio*len(video_paths)))
+    val_set = video_paths[:num_val]
+    train_set = video_paths[num_val:]   
     
 
     with open(P.join(output_dir, args.prefix+"_train.txt"), 'w') as f:
-        for video_path in video_paths:
+        for video_path in train_set:
             f.write(f"{os.path.basename(video_path).split('.')[0]}\n")
     f.close()
 
     with open(P.join(output_dir, args.prefix+"_test.txt"), 'w') as f:
-        for video_path in video_paths:
+        for video_path in val_set:
             f.write(f"{os.path.basename(video_path).split('.')[0]}\n")
     f.close()
